@@ -1,0 +1,6 @@
+framework module Pods_Mobile_Massage_and_Wellness {
+  umbrella header "Pods-Mobile Massage and Wellness-umbrella.h"
+
+  export *
+  module * { export * }
+}
