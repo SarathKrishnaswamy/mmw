@@ -31,6 +31,9 @@ struct NetworkConstants {
         static let saveCustomerDetails = "customer/save_customer_profile"
         static let getBusinessDetails = "customer/customer_business"
         static let saveBusinessDetails = "customer/customer_business_save"
+        static let getPreferenceDetails = "customer/preferencesService"
+        static let savePreferenceDetails = "customer/preferencesSave"
+        static let customerSetting = "settings/customer_setting"
     }
     
 }

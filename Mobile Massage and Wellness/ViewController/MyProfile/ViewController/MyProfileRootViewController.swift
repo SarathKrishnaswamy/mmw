@@ -37,12 +37,14 @@ class MyProfileRootViewController: UIViewController, UIPageViewControllerDataSou
         let storyboard = UIStoryboard(name: "Profile", bundle: nil)
         
         // Add your child view controllers here
+        
         let page1 = storyboard.instantiateViewController(withIdentifier: "ProfileDataViewController")
         let page2 = storyboard.instantiateViewController(withIdentifier: "BusinessDataViewController")
+        let page3 = storyboard.instantiateViewController(withIdentifier: "PreferenceDataViewController")
         
         
         
-        viewControllersList = [page1, page2]
+        viewControllersList = [page1, page2,page3]
     }
     
     @objc func changeIndex(segmentedControl: MXSegmentedControl) {
