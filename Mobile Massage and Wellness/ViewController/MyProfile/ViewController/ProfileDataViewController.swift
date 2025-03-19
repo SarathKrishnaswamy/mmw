@@ -40,6 +40,13 @@ class ProfileDataViewController: UIViewController, UITextFieldDelegate {
         setupUI()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        viewModel.fetchUser()
+        setupBindings()
+    }
+    
+    
 
     func setupUI(){
         firstNameView.layer.cornerRadius = 5
@@ -53,9 +60,6 @@ class ProfileDataViewController: UIViewController, UITextFieldDelegate {
         saveBtn.layer.cornerRadius = 5
         configureTextField(genderTxtField, with: gender)
         dobTxtField.setDatePicker(target: self, selector: #selector(doneTapped))
-        viewModel.fetchUser()
-        setupBindings()
-        
     }
     
     

@@ -61,6 +61,11 @@ class PreferenceViewModel {
     
     // Method to get the pickerView value from an API response key
     func getPickerValue(from key: String, for category: [String: String]?) -> String {
-            return category?[key] ?? "Unknown"
-        }
+        return category?[key] ?? "Unknown"
+    }
+    
+    func getPickerKey(for value: String, in category: [String: String]?) -> String? {
+        return category?.first(where: { $0.value == value })?.key
+    }
+
 }

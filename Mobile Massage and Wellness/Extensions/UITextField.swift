@@ -42,6 +42,7 @@ extension UITextField {
         static var pickerData = "pickerData"
         static var pickerView = "pickerView"
         static var selectionHandler = "selectionHandler"
+        static var shouldPreselectFirstItem = "shouldPreselectFirstItem"
     }
     
     // Store picker data dynamically
@@ -54,6 +55,16 @@ extension UITextField {
             setupPicker()
         }
     }
+    
+    // Flag to indicate whether first item should be preselected
+        var shouldPreselectFirstItem: Bool {
+            get {
+                return objc_getAssociatedObject(self, &AssociatedKeys.shouldPreselectFirstItem) as? Bool ?? false
+            }
+            set {
+                objc_setAssociatedObject(self, &AssociatedKeys.shouldPreselectFirstItem, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+            }
+        }
     
     // Closure for selection callback
     var selectionHandler: ((String) -> Void)? {
@@ -84,6 +95,12 @@ extension UITextField {
         pickerView.dataSource = self
         self.inputView = pickerView
         
+        // Pre-select the first item if flag is set
+        if shouldPreselectFirstItem, let firstItem = pickerData.first {
+            self.text = firstItem
+            pickerView.selectRow(0, inComponent: 0, animated: false)
+            selectionHandler?(firstItem)
+        }
         // Add toolbar with Done button
         let toolbar = UIToolbar()
         toolbar.sizeToFit()
@@ -147,7 +164,17 @@ extension UITextField {
         self.inputAccessoryView = toolbar
     }
     
+    // Function to format date as "dd/MM/yyyy"
+    
+    
 }
 
 
 
+
+extension Array {
+    subscript(safe index: Int?) -> Element? {
+        guard let index = index, index >= 0, index < count else { return nil }
+        return self[index]
+    }
+}

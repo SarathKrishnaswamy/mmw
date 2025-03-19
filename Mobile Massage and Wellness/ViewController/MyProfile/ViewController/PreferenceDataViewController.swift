@@ -36,6 +36,13 @@ class PreferenceDataViewController: UIViewController, UITextFieldDelegate {
         setupUI()
     }
     
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        viewModel.fetchCustomerPreferences()
+        setupBindings()
+    }
+    
     func setupUI(){
         notesTextView.delegate = self
         notesTextView.text = placeholderText
@@ -60,15 +67,21 @@ class PreferenceDataViewController: UIViewController, UITextFieldDelegate {
             
         }
         
-        viewModel.fetchCustomerPreferences()
-        setupBindings()
+        
     }
     
     private func setupBindings() {
         viewModel.onFetchSuccess = { preference in
             DispatchQueue.main.async {
                 self.medicalHistoryTextField.text = preference.data?.awareOption
-                self.provideMoreInfoTextField.text = preference.data?.moreInfo
+                if preference.data?.awareOption == "No"{
+                    self.provideMoreInfoView.isHidden = true
+                }
+                else{
+                    self.provideMoreInfoView.isHidden = false
+                    self.provideMoreInfoTextField.text = preference.data?.moreInfo
+                }
+                
                 if let preferences = self.viewModel.preferencesData {
                     let selectedArea = self.viewModel.getPickerValue(from: preference.data?.areas ?? "", for: preferences.areasDict)
                     let towelSheet = self.viewModel.getPickerValue(from: preference.data?.towelsSheet ?? "", for: preferences.towelsSheetDict)
@@ -78,6 +91,13 @@ class PreferenceDataViewController: UIViewController, UITextFieldDelegate {
                     self.towelsSheetTextField.text = towelSheet
                     self.pressurePreferenceTextField.text = pressurePreference
                     self.communicationPreferenceTextField.text = communicationPreference
+                    if preference.data?.note == "" {
+                        self.notesTextView.text = self.placeholderText
+                    }
+                    else{
+                        self.notesTextView.textColor = .black
+                        self.notesTextView.text = preference.data?.note ?? ""
+                    }
                     
                 }
             }
@@ -121,6 +141,40 @@ class PreferenceDataViewController: UIViewController, UITextFieldDelegate {
 
 
     @IBAction func saveBtnOnPressed(_ sender: Any) {
+        if focusAreaMassageTextField.text == "" {
+            AlertUtils.showAlert(title: "Error", message: "Please select focus area for massage", on: self)
+        }
+        else if towelsSheetTextField.text == "" {
+            AlertUtils.showAlert(title: "Error", message: "Please select Towels / Sheet Preference", on: self)
+        }
+        else if pressurePreferenceTextField.text == "" {
+            AlertUtils.showAlert(title: "Error", message: "Please select Pressure Preference", on: self)
+        }
+        else if communicationPreferenceTextField.text == "" {
+            AlertUtils.showAlert(title: "Error", message: "Please select Communication Preference", on: self)
+        }
+        else{
+            let areaValue = self.viewModel.getPickerKey(for: self.focusAreaMassageTextField.text ?? "", in: self.viewModel.preferencesData?.areasDict)
+            let towelSheetValue = self.viewModel.getPickerKey(for: self.towelsSheetTextField.text ?? "", in: self.viewModel.preferencesData?.towelsSheetDict)
+            let pressurePreferenceValue = self.viewModel.getPickerKey(for: self.pressurePreferenceTextField.text ?? "", in: self.viewModel.preferencesData?.pressurePreferenceDict)
+            let communicationPreferenceValue = self.viewModel.getPickerKey(for: self.communicationPreferenceTextField.text ?? "", in: self.viewModel.preferencesData?.communicationPreferenceDict)
+            
+            if self.notesTextView.text == placeholderText {
+                self.notesTextView.text = ""
+            }
+            
+            let params = [
+                "awareOption":self.medicalHistoryTextField.text ?? "",
+                "more_info":self.provideMoreInfoTextField.text ?? "",
+                "areas":areaValue ?? "",
+                "allergies":"2",
+                "towels_sheet":towelSheetValue ?? "",
+                "presure_preference":pressurePreferenceValue ?? "",
+                "communication_preference":communicationPreferenceValue ?? "",
+                "note":self.notesTextView.text ?? ""
+            ]
+            self.viewModel.savePreferences(params: params)
+        }
         
     }
     

@@ -34,6 +34,14 @@ struct NetworkConstants {
         static let getPreferenceDetails = "customer/preferencesService"
         static let savePreferenceDetails = "customer/preferencesSave"
         static let customerSetting = "settings/customer_setting"
+        static let getMyAppointments = "booking/bookdetails_show"
+        static let viewBooking = "booking/view/"
+        static let cancelBooking = "booking/cancel"
+        static let submitReviews = "booking/submitReviewAndRating"
+        static let addOnSetting = "settings/treatment"
+        static let genderSetting = "settings/gender"
+        static let durationSetting = "settings/duration"
+        static let servicesSetting = "settings/services"
     }
     
 }

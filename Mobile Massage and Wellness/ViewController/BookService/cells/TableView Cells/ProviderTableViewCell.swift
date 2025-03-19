@@ -9,6 +9,8 @@ import UIKit
 
 class ProviderTableViewCell: UITableViewCell {
 
+    @IBOutlet weak var providerValueLbl: UILabel!
+    @IBOutlet weak var editBtn: UIButton!
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code

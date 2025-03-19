@@ -9,6 +9,9 @@ import UIKit
 
 class SummaryTableViewCell: UITableViewCell {
 
+    @IBOutlet weak var summaryValueLbl: UILabel!
+    @IBOutlet weak var sumaryPriceLbl: UILabel!
+    @IBOutlet weak var totalDueLbl: UILabel!
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code

@@ -9,6 +9,11 @@ import UIKit
 
 class LocationDetailTableViewCell: UITableViewCell {
 
+    @IBOutlet weak var locationTypeValueLbl: UILabel!
+    @IBOutlet weak var parkingValueLbl: UILabel!
+    @IBOutlet weak var petsValueLbl: UILabel!
+    @IBOutlet weak var medicalHistoryValueLbl: UILabel!
+    @IBOutlet weak var editBtn: UIButton!
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code

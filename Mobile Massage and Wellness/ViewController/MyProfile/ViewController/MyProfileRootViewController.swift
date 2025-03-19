@@ -18,7 +18,7 @@ class MyProfileRootViewController: UIViewController, UIPageViewControllerDataSou
     private var sideMenuVisible = false
     private let sideMenuWidth: CGFloat = 280
     private var sideMenuVC: MenuTableViewController?
-    var segmentMenu = ["Profile", "Business", "Preference"]
+    var segmentMenu = ["PROFILE", "BUSINESS", "PREFERENCE"]
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -57,8 +57,14 @@ class MyProfileRootViewController: UIViewController, UIPageViewControllerDataSou
         // Determine the navigation direction
         let direction: UIPageViewController.NavigationDirection = selectedIndex > (pageViewController.viewControllers?.first.flatMap { viewControllersList.firstIndex(of: $0) } ?? 0) ? .forward : .reverse
         
-        pageViewController.setViewControllers([selectedViewController], direction: direction, animated: true, completion: nil)
-        
+        pageViewController.setViewControllers([selectedViewController], direction: direction, animated: true) { completed in
+            if completed {
+                // Ensure the API call happens when view appears
+                if let vc = selectedViewController as? UIViewController {
+                    vc.viewWillAppear(true)
+                }
+            }
+        }
     }
     
     private func setupSideMenu() {

@@ -31,14 +31,19 @@ class BusinessDataViewController: UIViewController, UITextFieldDelegate {
         // Do any additional setup after loading the view.
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        viewModel.fetchBusiness()
+        setupBindings()
+    }
+    
     func setupUI(){
         organisationView.layer.cornerRadius = 5
         businessNumberView.layer.cornerRadius = 5
         businessAddressView.layer.cornerRadius = 5
         businessTypeView.layer.cornerRadius = 5
         saveBtn.layer.cornerRadius = 5
-        viewModel.fetchBusiness()
-        setupBindings()
+        
     }
     
     private func setupBindings() {
@@ -46,7 +51,10 @@ class BusinessDataViewController: UIViewController, UITextFieldDelegate {
             self.organisationNameTxtField.text = profile.data?.organization
             self.businessNumberTxtField.text = profile.data?.businessNumber
             self.businessAddressTxtField.text = profile.data?.businessAddress
-            //self.businessTypeTxtField.text = profile.data?.email
+            let business = BusinessType.getDescription(from: Int(profile.data?.businessType ?? "") ?? 0)
+            self.businessTypeTxtField.text = business?.description
+            self.configureTextField(self.businessTypeTxtField, with: BusinessType.allDescriptions)
+
             
         }
 
@@ -88,11 +96,12 @@ class BusinessDataViewController: UIViewController, UITextFieldDelegate {
             AlertUtils.showAlert(title: "Alert", message: "Please enter Business Address", on: self)
         }
         else{
+            
             let params: [String: String] = [
                 "organization": self.organisationNameTxtField.text ?? "",
                 "business_number": self.businessNumberTxtField.text ?? "",
                 "business_address": self.businessAddressTxtField.text ?? "",
-                "business_type": self.businessTypeTxtField.text ?? ""
+                "business_type": String(BusinessType.getValue(from: self.businessTypeTxtField.text ?? "") ?? 0)
                 
             ]
             self.viewModel.saveUser(params: params)

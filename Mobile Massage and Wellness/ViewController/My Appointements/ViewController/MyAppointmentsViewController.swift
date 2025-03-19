@@ -11,17 +11,68 @@ class MyAppointmentsViewController: UIViewController {
 
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var selectionSegmentViewController: UISegmentedControl!
+    @IBOutlet weak var itemsNotFoundStackView: UIStackView!
     
     private var sideMenuVisible = false
     private let sideMenuWidth: CGFloat = 280
     private var sideMenuVC: MenuTableViewController?
+    let viewModel = MyAppointmentsViewModel()
+    var upcomingBookings: [Booking]?
+    var previousBookings: [Booking]?
+    var isUpcomingSelected: Bool = false
+    var isPreviousSelected: Bool = false
    
     override func viewDidLoad() {
         super.viewDidLoad()
         customizeSegmentedControl()
         setupSideMenu()
+        self.viewModel.fetchAppointments()
+        setupUpComingBoookings()
         
-        // Do any additional setup after loading the view.
+    }
+    
+    private func setupUpComingBoookings() {
+        self.isUpcomingSelected = true
+        self.isPreviousSelected = false
+        viewModel.onFetchAppointmentsSuccess = { appointments in
+            self.upcomingBookings = appointments.data?.upcomingBookings ?? []
+            if !(self.upcomingBookings?.isEmpty ?? false) {
+                self.collectionView.isHidden = false
+                self.itemsNotFoundStackView.isHidden = true
+            }
+            else{
+                self.collectionView.isHidden = true
+                self.itemsNotFoundStackView.isHidden = false
+            }
+            //self.previousBookings = appointments.data?.previousBookings ?? []
+            self.collectionView.reloadData()
+        }
+        
+        viewModel.onFetchAppointmentsFailure = { error in
+            print("Error fetching appointments: \(error)")
+        }
+    }
+    
+    
+    private func setupUpPreviousBookings() {
+        self.isUpcomingSelected = false
+        self.isPreviousSelected = true
+        viewModel.onFetchAppointmentsSuccess = { appointments in
+            self.previousBookings = appointments.data?.previousBookings ?? []
+            if !(self.previousBookings?.isEmpty ?? false) {
+                self.collectionView.isHidden = false
+                self.itemsNotFoundStackView.isHidden = true
+            }
+            else{
+                self.collectionView.isHidden = true
+                self.itemsNotFoundStackView.isHidden = false
+            }
+            self.collectionView.reloadData()
+        }
+        
+        viewModel.onFetchAppointmentsFailure = { error in
+            print("Error fetching appointments: \(error)")
+        }
     }
     
     private func setupSideMenu() {
@@ -100,6 +151,18 @@ class MyAppointmentsViewController: UIViewController {
         }
     
     
+    @IBAction func segmentControlonPressed(_ sender: Any) {
+        if selectionSegmentViewController.selectedSegmentIndex == 0 {
+            self.viewModel.fetchAppointments()
+            self.setupUpComingBoookings()
+        }
+        else{
+            self.viewModel.fetchAppointments()
+            self.setupUpPreviousBookings()
+        }
+    }
+    
+    
     @IBAction func menuBtnOnPressed(_ sender: Any) {
         showSideMenu()
         
@@ -110,17 +173,81 @@ class MyAppointmentsViewController: UIViewController {
 
 extension MyAppointmentsViewController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 6
+        if isUpcomingSelected {
+            return upcomingBookings?.count ?? 0
+        }
+        else{
+            return previousBookings?.count ?? 0
+        }
+        
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "MyAppointmentsCollectionViewCell", for: indexPath) as! MyAppointmentsCollectionViewCell
+        if isUpcomingSelected{
+            cell.bookingIDValue.text = String(self.upcomingBookings?[indexPath.row].bookingID ?? 0)
+            cell.dateValueLbl.text =  formatDateTimeNoAMPM(self.upcomingBookings?[indexPath.row].bookingDate ?? "")
+            cell.addressValueLbl.text = self.upcomingBookings?[indexPath.row].streetAddress ?? ""
+            cell.customerValueLbl.text = self.upcomingBookings?[indexPath.row].name ?? ""
+            cell.statusValueLbl.text = BookingStatusResponse(rawValue: self.upcomingBookings?[indexPath.row].acceptStatus ?? 0)?.description ?? "Unknown Status"
+            let status = BookingStatusResponse(rawValue: self.upcomingBookings?[indexPath.row].acceptStatus ?? 0)?.color
+            cell.statusValueLbl.textColor = status
+            
+            
+            cell.mapBtn.addTarget(self, action: #selector(openMap(sender:)), for: .touchUpInside)
+            cell.mapBtn.tag = indexPath.row
+        }
+        else{
+            cell.bookingIDValue.text = String(self.previousBookings?[indexPath.row].bookingID ?? 0)
+            cell.dateValueLbl.text =  formatDateTimeNoAMPM(self.previousBookings?[indexPath.row].bookingDate ?? "")
+            cell.addressValueLbl.text = self.previousBookings?[indexPath.row].streetAddress ?? ""
+            cell.customerValueLbl.text = self.previousBookings?[indexPath.row].name ?? ""
+            cell.statusValueLbl.text = BookingStatusResponse(rawValue: self.previousBookings?[indexPath.row].acceptStatus ?? 0)?.description ?? "Unknown Status"
+            let status = BookingStatusResponse(rawValue: self.previousBookings?[indexPath.row].acceptStatus ?? 0)?.color
+            cell.statusValueLbl.textColor = status
+            cell.mapBtn.addTarget(self, action: #selector(openMap(sender:)), for: .touchUpInside)
+            cell.mapBtn.tag = indexPath.row
+            
+        }
         return cell
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let cell = UIStoryboard(name: "MyAppointments", bundle: nil).instantiateViewController(withIdentifier: "MyAppointmentsBookingSummaryViewController") as! MyAppointmentsBookingSummaryViewController
-        self.navigationController?.pushViewController(cell, animated: true)
+        let vc = UIStoryboard(name: "MyAppointments", bundle: nil).instantiateViewController(withIdentifier: "MyAppointmentsBookingSummaryViewController") as! MyAppointmentsBookingSummaryViewController
+        if isUpcomingSelected{
+            vc.id = String(self.upcomingBookings?[indexPath.item].id ?? 0)
+        }
+        else{
+            vc.id = String(self.previousBookings?[indexPath.item].id ?? 0)
+        }
+        self.navigationController?.pushViewController(vc, animated: true)
+    }
+    
+    @objc func openMap(sender:UIButton){
+        let tag = sender.tag
+        let indexPath = IndexPath(item: tag, section: 0)
+        if isUpcomingSelected{
+            if let lat = self.upcomingBookings?[indexPath.item].latitude, let lon = self.upcomingBookings?[indexPath.item].longitude,
+               let latitude = Double(lat), let longitude = Double(lon) {
+                let googleMapsWebURL = URL(string: "https://www.google.com/maps?q=\(latitude),\(longitude)")!
+                UIApplication.shared.open(googleMapsWebURL)
+            }
+        }
+        else{
+            if let lat = self.previousBookings?[indexPath.item].latitude, let lon = self.previousBookings?[indexPath.item].longitude,
+               let latitude = Double(lat), let longitude = Double(lon) {
+                let googleMapsURL = URL(string: "comgooglemaps://?q=\(latitude),\(longitude)")!
+                
+                if UIApplication.shared.canOpenURL(googleMapsURL) {
+                    UIApplication.shared.open(googleMapsURL)
+                } else {
+                    // Fallback to Apple Maps if Google Maps is not installed
+                    let appleMapsURL = URL(string: "http://maps.apple.com/?ll=\(latitude),\(longitude)")!
+                    UIApplication.shared.open(appleMapsURL)
+                }
+            }
+        }
+        
     }
     
     

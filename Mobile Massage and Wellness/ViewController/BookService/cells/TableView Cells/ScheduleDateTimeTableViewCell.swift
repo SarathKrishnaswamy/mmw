@@ -9,6 +9,9 @@ import UIKit
 
 class ScheduleDateTimeTableViewCell: UITableViewCell {
 
+    @IBOutlet weak var dateTimeValueLbl: UILabel!
+    @IBOutlet weak var bookingFrequencyValueLbl: UILabel!
+    @IBOutlet weak var editBtn: UIButton!
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code

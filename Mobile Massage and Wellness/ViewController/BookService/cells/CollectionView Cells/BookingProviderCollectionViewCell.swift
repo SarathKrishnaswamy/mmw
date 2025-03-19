@@ -26,10 +26,12 @@ class BookingProviderCollectionViewCell: UICollectionViewCell {
                    self.bgView.backgroundColor = .selectedBg
                    self.bgView.layer.borderWidth = 1
                    self.bgView.layer.borderColor = UIColor.border.cgColor
+                   self.subtitleTxt.textColor = UIColor.border
                }
                else{
                    self.bgView.backgroundColor = .bg
                    self.bgView.layer.borderWidth = 0
+                   self.subtitleTxt.textColor = .black
                }
                
            }

@@ -9,6 +9,10 @@ import UIKit
 
 class RecipientTableViewCell: UITableViewCell {
 
+    @IBOutlet weak var recipientValueLbl: UILabel!
+    @IBOutlet weak var recipientEmailValueLbl: UILabel!
+    @IBOutlet weak var receipientMobileValueLbl: UILabel!
+    @IBOutlet weak var editBtn: UIButton!
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code

@@ -9,6 +9,8 @@ import UIKit
 
 class NoteForTherapistTableViewCell: UITableViewCell {
 
+    @IBOutlet weak var noteLbl: UILabel!
+    @IBOutlet weak var editBtn: UIButton!
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code

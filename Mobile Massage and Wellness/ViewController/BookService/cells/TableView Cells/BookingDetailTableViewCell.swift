@@ -9,6 +9,15 @@ import UIKit
 
 class BookingDetailTableViewCell: UITableViewCell {
 
+    @IBOutlet weak var addressValueLbl: UILabel!
+    @IBOutlet weak var sessionValueLbl: UILabel!
+    @IBOutlet weak var nameValueLbl: UILabel!
+    @IBOutlet weak var treatmentValueLbl: UILabel!
+    @IBOutlet weak var durationValueLbl: UILabel!
+    @IBOutlet weak var therapistGenderValueLbl: UILabel!
+    @IBOutlet weak var editBtn: UIButton!
+    
+    
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code

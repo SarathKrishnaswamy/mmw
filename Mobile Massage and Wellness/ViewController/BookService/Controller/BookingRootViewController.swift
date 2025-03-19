@@ -7,7 +7,9 @@
 
 import UIKit
 
-class BookingRootViewController: UIViewController, UIPageViewControllerDataSource, UIPageViewControllerDelegate {
+class BookingRootViewController: UIViewController, UIPageViewControllerDataSource, UIPageViewControllerDelegate, ViewBookingDelegate {
+    
+    
     
     @IBOutlet weak var containerView: UIView! // Connect this from Storyboard
     @IBOutlet weak var nextBtn: UIButton!
@@ -18,6 +20,7 @@ class BookingRootViewController: UIViewController, UIPageViewControllerDataSourc
     private var sideMenuVisible = false
     private let sideMenuWidth: CGFloat = 280
     private var sideMenuVC: MenuTableViewController?
+    var bookingDetail = BookingDetail()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -100,10 +103,16 @@ class BookingRootViewController: UIViewController, UIPageViewControllerDataSourc
         let storyboard = UIStoryboard(name: "BookService", bundle: nil)
         
         // Add your child view controllers here
-        let page1 = storyboard.instantiateViewController(withIdentifier: "BookingDetailViewController")
-        let page2 = storyboard.instantiateViewController(withIdentifier: "BookingScheduleViewController")
-        let page3 = storyboard.instantiateViewController(withIdentifier: "BookingReceiptViewController")
-        let page4 = storyboard.instantiateViewController(withIdentifier: "BookingProviderViewController")
+        let page1 = storyboard.instantiateViewController(withIdentifier: "BookingDetailViewController") as! BookingDetailViewController
+        let page2 = storyboard.instantiateViewController(withIdentifier: "BookingScheduleViewController") as! BookingScheduleViewController
+        let page3 = storyboard.instantiateViewController(withIdentifier: "BookingReceiptViewController") as! BookingReceiptViewController
+        let page4 = storyboard.instantiateViewController(withIdentifier: "BookingProviderViewController") as! BookingProviderViewController
+               
+        page1.bookingDetail = bookingDetail
+        page2.bookingDetail = bookingDetail
+        page3.bookingDetail = bookingDetail
+        page4.bookingDetail = bookingDetail
+        
         
         viewControllersList = [page1, page2, page3, page4]
     }
@@ -185,13 +194,46 @@ class BookingRootViewController: UIViewController, UIPageViewControllerDataSourc
         })
     }
     
+    
+    func didEditBookingDetail(pages:Int) {
+        guard let currentVC = pageViewController.viewControllers?.first,
+              let currentIndex = viewControllersList.firstIndex(of: currentVC),
+              currentIndex > 0 else { return }
+        
+        let previousVC = viewControllersList[pages]
+        pageViewController.setViewControllers([previousVC], direction: .reverse, animated: true, completion: { [weak self] completed in
+            guard let self = self else { return }
+            if completed {
+                self.toggleBackButton(hidden: pages == 0)
+            }
+        })
+    }
+    
 
     @IBAction func nextBtnOnPressed(_ sender: Any) {
         guard let currentVC = pageViewController.viewControllers?.first,
               let currentIndex = viewControllersList.firstIndex(of: currentVC) else { return }
         
+        // Perform validation only if on the first page (BookingDetailViewController)
+        if let bookingDetailVC = currentVC as? BookingDetailViewController {
+            if !bookingDetailVC.validateFields() {
+                return // Stop if validation fails
+            }
+        }
+        
+        if let bookingScheduleVC = currentVC as? BookingScheduleViewController {
+            if !bookingScheduleVC.validateFields() {
+                return 
+            }
+        }
+        
+        if let bookingReceiptVC = currentVC as? BookingReceiptViewController {
+            if !bookingReceiptVC.validateFields() {
+                return
+            }
+        }
+        
         if currentIndex < viewControllersList.count - 1 {
-            // Navigate to the next page in the list
             let nextVC = viewControllersList[currentIndex + 1]
             pageViewController.setViewControllers([nextVC], direction: .forward, animated: true, completion: { [weak self] completed in
                 guard let self = self else { return }
@@ -200,7 +242,6 @@ class BookingRootViewController: UIViewController, UIPageViewControllerDataSourc
                 }
             })
         } else {
-            // Perform action after the last page
             navigateToNewPage()
         }
     }
@@ -209,6 +250,9 @@ class BookingRootViewController: UIViewController, UIPageViewControllerDataSourc
     private func navigateToNewPage() {
         let storyboard = UIStoryboard(name: "BookService", bundle: nil) // Replace "NewStoryboard" with your storyboard name
         if let viewBookingController = storyboard.instantiateViewController(withIdentifier: "ViewBookingViewController") as? ViewBookingViewController { // Replace with the actual view controller identifier and class
+        
+            viewBookingController.delegate = self
+            viewBookingController.bookingDetail = bookingDetail
             // Present or push the new view controller
             self.navigationController?.pushViewController(viewBookingController, animated: true)
             // OR if not using navigation controller, present it modally

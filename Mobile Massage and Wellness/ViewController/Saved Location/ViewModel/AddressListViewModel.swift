@@ -35,10 +35,4 @@ class AddressViewModel {
             }
         }
     }
-    
-    
-    
-
-    
-
 }
